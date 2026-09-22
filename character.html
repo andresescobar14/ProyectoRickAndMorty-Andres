@@ -3,132 +3,236 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detalle del Personaje</title>
+  <title>Detalle del Personaje - Rick and Morty</title>
+  <!-- Framework Tailwind CSS v4 -->
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.css" integrity="sha512-x9WwyMYBnlXMNQ6kQ/Lyzu1NqIhLQKL5Oq6xByfXuRj7s9CskyCbLv/1IjqzJmXwFXWr0ov6jBV7Qbc0hh9nHg==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <!-- FontAwesome Iconos v6.7.2 (Versión Estable) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-EvVX03BNElBL0fuOUX125253d63x2+N3w5/i3S_t1N+9f" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
-<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4 lg:p-8 font-sans">
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-3 sm:p-6 lg:p-10 font-sans text-gray-100 antialiased selection:bg-blue-600 selection:text-white">
   
-  <div id="tarjeta" class="w-full max-w-4xl">
-    <h1 class="text-white text-center text-2xl font-bold animate-pulse">Cargando información a través de portales...</h1>
-  </div>
+  <!-- Sombra del portal y contenedor principal -->
+  <main id="tarjeta" class="w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto transition-all duration-300">
+    <div class="flex flex-col items-center justify-center p-8 bg-gray-800/50 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl">
+      <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <h1 class="text-white text-center text-lg sm:text-xl md:text-2xl font-bold animate-pulse">
+        Cargando información a través de portales...
+      </h1>
+    </div>
+  </main>
 
   <script>
+    /**
+     * @fileoverview Módulo de visualización detallada de personajes de Rick and Morty.
+     * Gestiona la autenticación de sesión, peticiones a la API REST, persistencia de favoritos 
+     * por usuario en LocalStorage y adaptación responsiva de la interfaz.
+     * @version 2.0.0
+     */
+
     document.addEventListener("DOMContentLoaded", () => {
-      // Proteger ruta
+      /**
+       * Verifica la validez de la sesión del usuario.
+       * Si no existe un estado activo en sessionStorage, redirige al formulario de acceso.
+       * @type {string|null}
+       */
       const estadoSesionActiva = sessionStorage.getItem("estadoSesionActiva");
       if (!estadoSesionActiva) {
         window.location.href = "login.html"; 
         return;
       }
 
+      /**
+       * Identificador único del usuario actualmente autenticado.
+       * @type {string|null}
+       */
       const usuarioLogueado = sessionStorage.getItem("usuarioLogueado");
+
+      /**
+       * Clave dinámica para aislar la lista de favoritos por cada usuario.
+       * @type {string}
+       */
       const claveFavoritos = usuarioLogueado ? `favoritos_${usuarioLogueado}` : 'favoritos';
 
       try {
+        /** @type {HTMLElement} Elemento contenedor donde se renderiza la vista */
         const tarjeta = document.getElementById("tarjeta");
         
+        /**
+         * Realiza la petición HTTP GET a la API REST de Rick and Morty para obtener 
+         * el detalle de un personaje por su ID y renderizar su vista adaptativa.
+         * 
+         * @async
+         * @function traerPersonaje
+         * @param {string|number} id - Identificador numérico único del personaje.
+         * @returns {Promise<void>}
+         */
         async function traerPersonaje(id) {
-          let personaje = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
-            .then((data) => data.json());
+          const respuesta = await fetch(`https://rickandmortyapi.com/api/character/${id}`);
+          const personaje = await respuesta.json();
           
-          if (personaje.error) {
+          // Control de respuesta errónea o ID inexistente
+          if (personaje.error || !respuesta.ok) {
             tarjeta.innerHTML = `
-              <div class="bg-red-500/10 border border-red-500 text-red-500 p-6 rounded-xl text-center">
-                <h1 class="text-3xl font-black mb-2">¡Error 404!</h1>
-                <p>Personaje no encontrado en este universo.</p>
-                <a href="main.html" class="inline-block mt-4 text-white bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">Regresar</a>
+              <div class="bg-red-950/40 border border-red-500/50 text-red-200 p-6 sm:p-8 rounded-2xl text-center shadow-2xl backdrop-blur-sm max-w-md mx-auto">
+                <i class="fa-solid fa-triangle-exclamation text-4xl sm:text-5xl text-red-500 mb-4 animate-bounce"></i>
+                <h1 class="text-2xl sm:text-3xl font-black mb-2 text-white">¡Error 404!</h1>
+                <p class="text-sm sm:text-base text-gray-300 mb-6">Personaje no encontrado en este universo dimensonal.</p>
+                <a href="main.html" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto text-white bg-red-600 hover:bg-red-700 active:scale-95 transition-all duration-200 px-6 py-3 rounded-xl font-bold shadow-lg shadow-red-600/30">
+                  <i class="fa-solid fa-house"></i> Regresar al Inicio
+                </a>
               </div>`;
-          } else {
-            let colorEstado = "bg-gray-500";
-            if (personaje.status === "Alive") colorEstado = "bg-green-500";
-            if (personaje.status === "Dead") colorEstado = "bg-red-500";
+            return;
+          }
 
-            let numEpisodios = personaje.episode.length;
-            let favoritosGuardados = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
-            const esFavorito = favoritosGuardados.some(fav => fav.id === personaje.id);
+          /** 
+           * Clases CSS para representar visualmente el estado vital del personaje 
+           * @type {{bg: string, glow: string}} 
+           */
+          let configuracionEstado = {
+            bg: "bg-gray-500",
+            glow: "shadow-gray-500/50"
+          };
 
-            tarjeta.innerHTML = `
-              <div class="bg-gray-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row w-full border border-gray-700">
-                <div class="md:w-1/2">
-                  <img src="${personaje.image}" alt="${personaje.name}" class="w-full h-full min-h-[300px] object-cover" />
-                </div>
-                <div class="p-6 md:p-8 md:w-1/2 flex flex-col justify-center">
-                  <div class="mb-6 flex justify-between items-start gap-4">
-                    <div>
-                      <h1 class="text-4xl md:text-5xl font-black text-white mb-2 leading-tight">${personaje.name}</h1>
-                      <div class="flex items-center gap-2 text-lg text-white font-medium">
-                        <span class="w-3 h-3 rounded-full ${colorEstado} shadow-[0_0_8px_${colorEstado}]"></span>
-                        <span>${personaje.status} - ${personaje.species}</span>
+          if (personaje.status === "Alive") {
+            configuracionEstado = { bg: "bg-emerald-500", glow: "shadow-emerald-500/80" };
+          } else if (personaje.status === "Dead") {
+            configuracionEstado = { bg: "bg-rose-500", glow: "shadow-rose-500/80" };
+          }
+
+          /** @type {number} Total de apariciones en episodios del show */
+          const numEpisodios = personaje.episode ? personaje.episode.length : 0;
+
+          /** @type {Array<Object>} Lista persistida de favoritos del usuario */
+          const favoritosGuardados = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
+
+          /** @type {boolean} Indicador si el personaje ya está guardado en favoritos */
+          const esFavorito = favoritosGuardados.some(fav => fav.id === personaje.id);
+
+          // Inyección de estructura HTML adaptativa
+          tarjeta.innerHTML = `
+            <article class="bg-gray-800/90 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row w-full border border-gray-700/70 transition-all">
+              
+              <!-- Galería/Imagen del personaje -->
+              <div class="w-full md:w-1/2 aspect-square md:aspect-auto relative overflow-hidden bg-gray-950 group">
+                <img 
+                  src="${personaje.image}" 
+                  alt="Fotografía de ${personaje.name}" 
+                  class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out" 
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80 md:hidden"></div>
+              </div>
+
+              <!-- Información y Metadatos -->
+              <div class="p-5 sm:p-8 md:w-1/2 flex flex-col justify-between">
+                
+                <!-- Encabezado con Nombre y Acción de Favorito -->
+                <div>
+                  <div class="mb-4 sm:mb-6 flex justify-between items-start gap-4">
+                    <div class="pr-2">
+                      <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-2 leading-tight tracking-tight">
+                        ${personaje.name}
+                      </h1>
+                      <div class="flex items-center gap-2.5 text-sm sm:text-lg text-gray-200 font-medium">
+                        <span class="w-3 h-3 rounded-full ${configuracionEstado.bg} shadow-lg ${configuracionEstado.glow} shrink-0 animate-pulse"></span>
+                        <span class="capitalize">${personaje.status} - ${personaje.species}</span>
                       </div>
                     </div>
-                    <button id="btnFavoritoDetalle" class="text-4xl hover:scale-110 transition-transform cursor-pointer focus:outline-none shrink-0">
-                      <i class="${esFavorito ? 'fa-star fa-solid text-yellow-400' : 'fa-star fa-regular text-gray-400'}" id="iconoDetalle"></i>
+                    
+                    <button 
+                      id="btnFavoritoDetalle" 
+                      aria-label="Marcar o desmarcar como favorito"
+                      class="text-3xl sm:text-4xl text-gray-400 hover:text-yellow-400 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none shrink-0 p-1 rounded-lg focus:ring-2 focus:ring-yellow-400/50"
+                    >
+                      <i class="${esFavorito ? 'fa-solid fa-star text-yellow-400' : 'fa-regular fa-star text-gray-400'}" id="iconoDetalle"></i>
                     </button>
                   </div>
-                  
-                  <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-gray-900/50 p-3 rounded-xl border border-gray-700">
+
+                  <!-- Grilla de Atributos Secundarios -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                    <div class="bg-gray-900/60 p-3.5 rounded-xl border border-gray-700/50">
                       <p class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Género</p>
-                      <p class="text-white text-lg font-semibold">${personaje.gender}</p>
+                      <p class="text-white text-base sm:text-lg font-semibold">${personaje.gender}</p>
                     </div>
-                    <div class="bg-gray-900/50 p-3 rounded-xl border border-gray-700">
+
+                    <div class="bg-gray-900/60 p-3.5 rounded-xl border border-gray-700/50">
                       <p class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Apariciones</p>
-                      <p class="text-white text-lg font-semibold">${numEpisodios} episodio(s)</p>
+                      <p class="text-white text-base sm:text-lg font-semibold">${numEpisodios} episodio(s)</p>
                     </div>
-                    <div class="col-span-2 bg-gray-900/50 p-3 rounded-xl border border-gray-700">
-                      <p class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Lugar de origen</p>
-                      <p class="text-white text-lg font-semibold">${personaje.origin.name}</p>
+
+                    <div class="sm:col-span-2 bg-gray-900/60 p-3.5 rounded-xl border border-gray-700/50">
+                      <p class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Lugar de Origen</p>
+                      <p class="text-white text-base sm:text-lg font-semibold">${personaje.origin.name}</p>
                     </div>
-                    <div class="col-span-2 bg-gray-900/50 p-3 rounded-xl border border-gray-700">
-                      <p class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Ubicación actual</p>
-                      <p class="text-white text-lg font-semibold">${personaje.location.name}</p>
+
+                    <div class="sm:col-span-2 bg-gray-900/60 p-3.5 rounded-xl border border-gray-700/50">
+                      <p class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Ubicación Actual</p>
+                      <p class="text-white text-base sm:text-lg font-semibold">${personaje.location.name}</p>
                     </div>
                   </div>
-                  <a href="main.html" class="mt-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl text-center transition-colors shadow-lg hover:shadow-blue-500/50">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Volver al listado
-                  </a>
                 </div>
+
+                <!-- Botón para retornar al catálogo -->
+                <a 
+                  href="main.html" 
+                  class="mt-2 sm:mt-auto bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold py-3.5 px-6 rounded-xl text-center transition-all duration-200 shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 text-sm sm:text-base"
+                >
+                  <i class="fa-solid fa-arrow-left"></i> Volver al listado
+                </a>
               </div>
-            `;
+            </article>
+          `;
 
-            const btnFavorito = document.getElementById("btnFavoritoDetalle");
-            const icono = document.getElementById("iconoDetalle");
+          /** @type {HTMLButtonElement} Botón de alternancia de estado de favorito */
+          const btnFavorito = document.getElementById("btnFavoritoDetalle");
+          /** @type {HTMLElement} Icono descriptivo dentro del botón de favorito */
+          const icono = document.getElementById("iconoDetalle");
 
-            btnFavorito.addEventListener("click", () => {
-              let listaFavoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
-              const yaExiste = listaFavoritos.some(fav => fav.id === personaje.id);
+          /**
+           * EventListener para alternar el personaje dentro de la lista de favoritos en LocalStorage.
+           */
+          btnFavorito.addEventListener("click", () => {
+            let listaFavoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
+            const yaExiste = listaFavoritos.some(fav => fav.id === personaje.id);
 
-              if (yaExiste) {
-                listaFavoritos = listaFavoritos.filter(fav => fav.id !== personaje.id);
-                icono.className = "fa-star fa-regular text-gray-400";
-              } else {
-                listaFavoritos.push(personaje);
-                icono.className = "fa-star fa-solid text-yellow-400";
-              }
-              localStorage.setItem(claveFavoritos, JSON.stringify(listaFavoritos));
-            });
-          }
+            if (yaExiste) {
+              listaFavoritos = listaFavoritos.filter(fav => fav.id !== personaje.id);
+              icono.className = "fa-regular fa-star text-gray-400";
+            } else {
+              listaFavoritos.push(personaje);
+              icono.className = "fa-solid fa-star text-yellow-400";
+            }
+            
+            localStorage.setItem(claveFavoritos, JSON.stringify(listaFavoritos));
+          });
         }
 
+        // Lectura de parámetros en la URL (Query String)
         const url = window.location.search;
         const contenidoUrl = new URLSearchParams(url);
         const valorId = contenidoUrl.get("id");
         
+        // Validación de existencia de parámetro ID
         if (!valorId) {
           tarjeta.innerHTML = `
-            <div class="bg-red-500/10 border border-red-500 text-red-500 p-6 rounded-xl text-center">
-              <h1 class="text-2xl font-bold mb-2">Error de navegación</h1>
-              <p>Falta el ID del personaje en la URL.</p>
-              <a href="main.html" class="inline-block mt-4 text-white bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">Regresar</a>
+            <div class="bg-red-950/40 border border-red-500/50 text-red-200 p-6 sm:p-8 rounded-2xl text-center shadow-2xl backdrop-blur-sm max-w-md mx-auto">
+              <i class="fa-solid fa-circle-exclamation text-4xl sm:text-5xl text-red-500 mb-4"></i>
+              <h1 class="text-xl sm:text-2xl font-bold mb-2 text-white">Error de navegación</h1>
+              <p class="text-sm sm:text-base text-gray-300 mb-6">No se ha especificado el parámetro ID del personaje en la URL.</p>
+              <a href="main.html" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto text-white bg-red-600 hover:bg-red-700 active:scale-95 transition-all duration-200 px-6 py-3 rounded-xl font-bold shadow-lg shadow-red-600/30">
+                <i class="fa-solid fa-house"></i> Regresar
+              </a>
             </div>`;
         } else {
           traerPersonaje(valorId);
         }
       } catch (error) {
+        console.error("Error detectado en el módulo de detalles:", error);
         document.getElementById("tarjeta").innerHTML = `
-          <div class="text-red-500 text-center bg-gray-800 p-6 rounded-xl">
-            <h1 class="text-2xl font-bold">Ops, hubo un error de conexión</h1>
+          <div class="text-red-400 text-center bg-gray-800/90 border border-red-500/30 p-6 sm:p-8 rounded-2xl shadow-2xl max-w-md mx-auto">
+            <i class="fa-solid fa-wifi-slash text-4xl mb-3 text-red-500"></i>
+            <h1 class="text-xl font-bold text-white mb-1">Error de conexión</h1>
+            <p class="text-sm text-gray-400">Ocurrió un problema al comunicarse con el servidor interdimensional.</p>
           </div>`;
       }
     });

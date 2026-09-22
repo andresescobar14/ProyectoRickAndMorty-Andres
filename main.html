@@ -3,106 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Main</title>
+  <title>Catálogo - Rick and Morty</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
-<body class="bg-blue-600 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-900 min-h-screen flex flex-col font-sans antialiased text-gray-100">
   
-  <header class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-md">
-    <h1 class="text-xl font-bold">Rick and Morty App</h1>
-    <div class="flex items-center gap-4">
-      <span id="displayNombre" class="font-medium text-gray-200"></span>
-      <!-- Nuevo botón hacia Mi Cuenta -->
-      <a href="account.html" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-bold transition duration-300">
-        <i class="fa-solid fa-user mr-1"></i> Mi Cuenta
+  <header class="bg-slate-950 text-white p-4 sm:px-6 md:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xl border-b border-gray-800 sticky top-0 z-50">
+    <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">Rick and Morty</h1>
+    
+    <div class="flex items-center flex-wrap justify-center gap-2 sm:gap-4 w-full sm:w-auto">
+      <span id="displayNombre" class="font-medium text-gray-300 text-sm sm:text-base mr-2"></span>
+      <a href="account.html" class="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white border border-blue-500/50 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all duration-300 text-sm sm:text-base flex items-center">
+        <i class="fa-solid fa-user mr-2"></i> Mi Cuenta
       </a>
-      <button id="btnCerrarSesion" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition duration-300 cursor-pointer">
-        <i class="fa-solid fa-power-off mr-1"></i> Salir
+      <button id="btnCerrarSesion" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/50 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all duration-300 cursor-pointer text-sm sm:text-base flex items-center">
+        <i class="fa-solid fa-power-off mr-2"></i> Salir
       </button>
     </div>
   </header>
 
-  <main id="contenedorPersonajes" class="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 flex-grow">
-    <!-- Tarjetas -->
+  <main class="flex-grow p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
+    <div id="contenedorPersonajes" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <!-- Tarjetas dinámicas -->
+    </div>
   </main>
 
   <script>
+    /**
+     * @fileoverview Módulo principal del catálogo de personajes.
+     * Gestiona la obtención de datos de la API, renderizado de grillas y marcadores de favoritos.
+     */
     document.addEventListener("DOMContentLoaded", () => {
-      // 1. Proteger ruta con nombre no genérico
+      // 1. Validación de sesión
       const estadoSesionActiva = sessionStorage.getItem("estadoSesionActiva");
       if (!estadoSesionActiva) {
         window.location.href = "login.html"; 
         return;
       }
 
-      // 2. Mostrar datos
+      // 2. Información del usuario
       const nombreUsuario = sessionStorage.getItem("nombreUsuario") || "Usuario";
-      document.getElementById("displayNombre").textContent = `Hola, ${nombreUsuario}`;
+      document.getElementById("displayNombre").innerHTML = `Hola, <strong class="text-white">${nombreUsuario}</strong>`;
 
-      // 3. Cerrar sesión
-      const btnCerrarSesion = document.getElementById("btnCerrarSesion");
-      btnCerrarSesion.addEventListener("click", () => {
+      // 3. Lógica de cierre de sesión
+      document.getElementById("btnCerrarSesion").addEventListener("click", () => {
         sessionStorage.removeItem("estadoSesionActiva");
         sessionStorage.removeItem("usuarioLogueado");
         sessionStorage.removeItem("nombreUsuario");
         window.location.href = "login.html";
       });
 
-      // 4. Lógica de personajes
+      // 4. Lógica de API y favoritos
       const usuarioLogueado = sessionStorage.getItem("usuarioLogueado");
       const claveFavoritos = usuarioLogueado ? `favoritos_${usuarioLogueado}` : 'favoritos';
+      const contenedor = document.getElementById("contenedorPersonajes");
 
+      /**
+       * Obtiene y renderiza la lista de personajes de la API oficial.
+       * @async
+       */
       async function traerPersonajes() {
-        let personajes = await fetch(`https://rickandmortyapi.com/api/character`)
-          .then((data) => data.json());
+        try {
+          const respuesta = await fetch(`https://rickandmortyapi.com/api/character`);
+          const personajes = await respuesta.json();
+          const favoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
+          
+          personajes.results.forEach((personaje) => {
+            const esFavorito = favoritos.some(fav => fav.id === personaje.id);
+            const tarjeta = document.createElement("article");
+            
+            let colorEstado = "bg-gray-500";
+            if(personaje.status === "Alive") colorEstado = "bg-emerald-500";
+            if(personaje.status === "Dead") colorEstado = "bg-rose-500";
 
-        let favoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
-        let contenido = document.getElementById("contenedorPersonajes"); 
-        
-        personajes.results.forEach((personaje) => {
-          let tarjeta = document.createElement("div");
-          const esFavorito = favoritos.some(fav => fav.id === personaje.id);
-
-          tarjeta.innerHTML = `
-            <a href="./character.html?id=${personaje.id}" class="block h-full">
-              <img src="${personaje.image}" alt="${personaje.name}" class="w-full h-48 object-cover object-top" />
-              <div class="p-4 flex flex-col">
-                <h2 class="text-xl font-bold">${personaje.name}</h2>
-                <div class="flex items-center justify-between mt-1">
-                  <p class="text-gray-300 text-sm font-medium">${personaje.status} - ${personaje.species}</p>
-                  <button class="btn-favorito relative z-10 text-xl hover:scale-125 transition-transform p-1 cursor-pointer">
-                    <i class="${esFavorito ? 'fa-star fa-solid text-yellow-400' : 'fa-star fa-regular text-gray-400'}" id="icono"></i>
-                  </button>
+            tarjeta.className = "bg-slate-800 text-white rounded-2xl overflow-hidden shadow-lg border border-slate-700 flex flex-col relative transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/20 group";
+            
+            tarjeta.innerHTML = `
+              <a href="./character.html?id=${personaje.id}" class="flex flex-col h-full outline-none focus:ring-2 focus:ring-blue-500 rounded-2xl">
+                <div class="relative overflow-hidden aspect-square sm:aspect-auto sm:h-56">
+                  <img src="${personaje.image}" alt="${personaje.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
                 </div>
-              </div>
-            </a>
-          `;
-          tarjeta.className = "bg-black text-white rounded-xl overflow-hidden shadow-xl border border-gray-800 flex flex-col relative transition transform hover:-translate-y-1 hover:shadow-2xl";
-          contenido.appendChild(tarjeta);
-
-          const btnFavorito = tarjeta.querySelector(".btn-favorito");
-          const icono = tarjeta.querySelector("i");
-
-          btnFavorito.addEventListener("click", (e) => {
-            e.preventDefault(); 
-            e.stopPropagation();
+                <div class="p-4 sm:p-5 flex flex-col flex-grow relative z-10 bg-slate-800">
+                  <h2 class="text-lg sm:text-xl font-black leading-tight mb-2 truncate" title="${personaje.name}">${personaje.name}</h2>
+                  <div class="flex items-center justify-between mt-auto">
+                    <div class="flex items-center gap-2 text-slate-300 text-xs sm:text-sm font-medium">
+                      <span class="w-2.5 h-2.5 rounded-full ${colorEstado} shadow-sm"></span>
+                      <span class="truncate max-w-[120px]">${personaje.status} - ${personaje.species}</span>
+                    </div>
+                    <button class="btn-favorito relative z-20 text-xl sm:text-2xl hover:scale-125 active:scale-95 transition-all p-1 cursor-pointer focus:outline-none" aria-label="Añadir a favoritos">
+                      <i class="${esFavorito ? 'fa-solid fa-star text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]' : 'fa-regular fa-star text-slate-400'}" id="icono-${personaje.id}"></i>
+                    </button>
+                  </div>
+                </div>
+              </a>
+            `;
             
-            let listaFavoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
-            const yaExiste = listaFavoritos.some(fav => fav.id === personaje.id);
+            contenedor.appendChild(tarjeta);
 
-            if (yaExiste) {
-              listaFavoritos = listaFavoritos.filter(fav => fav.id !== personaje.id);
-              icono.className = "fa-star fa-regular text-gray-400";
-            } else {
-              listaFavoritos.push(personaje);
-              icono.className = "fa-star fa-solid text-yellow-400";
-            }
-            
-            localStorage.setItem(claveFavoritos, JSON.stringify(listaFavoritos));
+            // Evento para el botón de favorito de cada tarjeta
+            const btnFavorito = tarjeta.querySelector(".btn-favorito");
+            const icono = tarjeta.querySelector("i");
+
+            btnFavorito.addEventListener("click", (e) => {
+              e.preventDefault(); 
+              e.stopPropagation(); // Evita navegar a character.html al hacer click en la estrella
+              
+              let listaFavoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
+              const yaExiste = listaFavoritos.some(fav => fav.id === personaje.id);
+
+              if (yaExiste) {
+                listaFavoritos = listaFavoritos.filter(fav => fav.id !== personaje.id);
+                icono.className = "fa-regular fa-star text-slate-400";
+              } else {
+                listaFavoritos.push(personaje);
+                icono.className = "fa-solid fa-star text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]";
+              }
+              
+              localStorage.setItem(claveFavoritos, JSON.stringify(listaFavoritos));
+            });
           });
-        });
+        } catch (error) {
+          contenedor.innerHTML = `<div class="col-span-full text-center p-8 bg-red-900/30 border border-red-500 text-red-200 rounded-2xl">Error cargando dimensiones intergalácticas. Intenta más tarde.</div>`;
+        }
       }
+      
       traerPersonajes();
     });
   </script>

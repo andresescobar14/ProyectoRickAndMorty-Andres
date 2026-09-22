@@ -3,132 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Usuario</title>
+  <title>Registro de Usuario - Rick and Morty</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
-<body class="bg-gray-100 p-4 flex flex-col items-center justify-center min-h-screen">
-    <form class="max-w-xl w-full mx-auto bg-white p-8 rounded-xl flex flex-col gap-4" id="formulario">
-      <h2 class="text-2xl font-bold text-center mb-4">Registro de Usuario</h2>
+<body class="bg-gray-100 p-4 sm:p-8 flex flex-col items-center justify-center min-h-screen antialiased">
+    <form class="max-w-md sm:max-w-xl w-full mx-auto bg-white p-6 sm:p-8 rounded-2xl flex flex-col gap-4 shadow-xl border border-gray-200" id="formulario">
+      <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2 sm:mb-4 text-gray-800">Registro de Usuario</h2>
       
-      <div class="flex flex-col">
-        <label for="name" class="font-semibold mb-1">Nombre</label>
-        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="text" id="name" name="nombre" placeholder="Ej. Juan" />
-      </div>
-      
-      <div class="flex flex-col">
-        <label for="lastName" class="font-semibold mb-1">Apellido</label>
-        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="text" id="lastName" name="apellido" placeholder="Ej. Pérez" />
-      </div>
-      
-      <div class="flex flex-col">
-        <label for="email" class="font-semibold mb-1">Correo</label>
-        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="email" id="email" name="correo" placeholder="correo@ejemplo.com" />
-      </div>
-      
-      <!-- Contraseña -->
-      <div class="flex flex-col">
-        <label for="password" class="font-semibold mb-1">Contraseña</label>
-        <div class="relative">
-          <input class="border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-full focus:outline-none focus:border-blue-500" type="password" id="password" name="contraseña" placeholder="Contraseña segura" />
-          <span id="btnOjitoRegistro" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500">👁️</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex flex-col">
+          <label for="name" class="font-semibold mb-1 text-gray-700">Nombre</label>
+          <input class="border border-gray-300 rounded-lg py-2.5 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" type="text" id="name" name="nombre" placeholder="Ej. Juan" />
+        </div>
+        
+        <div class="flex flex-col">
+          <label for="lastName" class="font-semibold mb-1 text-gray-700">Apellido</label>
+          <input class="border border-gray-300 rounded-lg py-2.5 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" type="text" id="lastName" name="apellido" placeholder="Ej. Pérez" />
         </div>
       </div>
       
-      <!-- Confirmar Contraseña -->
       <div class="flex flex-col">
-        <label for="confirmPassword" class="font-semibold mb-1">Confirmar Contraseña</label>
+        <label for="email" class="font-semibold mb-1 text-gray-700">Correo</label>
+        <input class="border border-gray-300 rounded-lg py-2.5 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" type="email" id="email" name="correo" placeholder="correo@ejemplo.com" />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="password" class="font-semibold mb-1 text-gray-700">Contraseña</label>
         <div class="relative">
-          <input class="border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-full focus:outline-none focus:border-blue-500" type="password" id="confirmPassword" name="confirmar_contraseña" placeholder="Repite tu contraseña" />
-          <span id="btnOjitoConfirmar" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500">👁️</span>
+          <input class="border border-gray-300 rounded-lg py-2.5 pl-4 pr-10 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" type="password" id="password" name="contraseña" placeholder="Contraseña segura" />
+          <button type="button" id="btnOjitoRegistro" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 p-1 focus:outline-none">
+            <i class="fa-solid fa-eye" id="iconoOjitoRegistro"></i>
+          </button>
         </div>
       </div>
       
-      <input type="submit" value="Registrarse" class="mt-4 p-3 bg-blue-600 hover:bg-blue-700 transition duration-300 font-bold rounded-lg text-white cursor-pointer"/>
+      <div class="flex flex-col">
+        <label for="confirmPassword" class="font-semibold mb-1 text-gray-700">Confirmar Contraseña</label>
+        <div class="relative">
+          <input class="border border-gray-300 rounded-lg py-2.5 pl-4 pr-10 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" type="password" id="confirmPassword" name="confirmar_contraseña" placeholder="Repite tu contraseña" />
+          <button type="button" id="btnOjitoConfirmar" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 p-1 focus:outline-none">
+            <i class="fa-solid fa-eye" id="iconoOjitoConfirmar"></i>
+          </button>
+        </div>
+      </div>
       
-      <p class="text-center text-sm text-gray-600 mt-2">¿Ya tienes cuenta? <a href="login.html" class="text-blue-600 font-bold hover:underline">Inicia sesión</a></p>
+      <button type="submit" class="mt-4 p-3 sm:p-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 font-bold rounded-lg text-white shadow-lg shadow-blue-500/30">
+        Registrarse
+      </button>
+      
+      <p class="text-center text-sm sm:text-base text-gray-600 mt-2">¿Ya tienes cuenta? <a href="login.html" class="text-blue-600 font-bold hover:underline">Inicia sesión</a></p>
 
-      <div id="errores"></div>
+      <div id="errores" class="mt-2"></div>
     </form>
 
     <script>
+      /**
+       * @fileoverview Módulo de registro de nuevos usuarios.
+       * Gestiona validaciones de formato, comprobación de duplicados y almacenamiento inicial.
+       */
       document.addEventListener("DOMContentLoaded", () => {
-        // Validación de ruta: Si ya hay sesión activa, expulsar de registro
         if (sessionStorage.getItem("estadoSesionActiva")) {
           window.location.href = "main.html";
           return;
         }
 
-        let nombreRegex = /^[a-zA-ZñÑáÁéÉíÍóÓúÚ\s']+$/i; 
-        let correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        let passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&\.])[A-Za-z\d@$!\%*#?&\.]{8,50}$/;
+        const nombreRegex = /^[a-zA-ZñÑáÁéÉíÍóÓúÚ\s']+$/i; 
+        const correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&\.])[A-Za-z\d@$!\%*#?&\.]{8,50}$/;
 
-        // --- LÓGICA DE VISIBILIDAD DE CONTRASEÑA ---
-        
-        let btnOjitoRegistro = document.getElementById("btnOjitoRegistro");
-        let campoContrasenaRegistro = document.getElementById("password");
-
-        btnOjitoRegistro.addEventListener("click", () => {
-          if (campoContrasenaRegistro.type === "password") {
-            campoContrasenaRegistro.type = "text";
-            btnOjitoRegistro.textContent = "🙈";
+        /**
+         * Función genérica para alternar visibilidad de contraseña.
+         * @param {HTMLInputElement} input - Elemento input de contraseña.
+         * @param {HTMLElement} icon - Elemento icono de FontAwesome.
+         */
+        const togglePassword = (input, icon) => {
+          if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
           } else {
-            campoContrasenaRegistro.type = "password";
-            btnOjitoRegistro.textContent = "👁️";
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
           }
-        });
+        };
 
-        let btnOjitoConfirmar = document.getElementById("btnOjitoConfirmar");
-        let campoConfirmarContrasena = document.getElementById("confirmPassword");
+        const campoContrasena = document.getElementById("password");
+        const iconoRegistro = document.getElementById("iconoOjitoRegistro");
+        document.getElementById("btnOjitoRegistro").addEventListener("click", () => togglePassword(campoContrasena, iconoRegistro));
 
-        btnOjitoConfirmar.addEventListener("click", () => {
-          if (campoConfirmarContrasena.type === "password") {
-            campoConfirmarContrasena.type = "text";
-            btnOjitoConfirmar.textContent = "🙈";
-          } else {
-            campoConfirmarContrasena.type = "password";
-            btnOjitoConfirmar.textContent = "👁️";
-          }
-        });
+        const campoConfirmar = document.getElementById("confirmPassword");
+        const iconoConfirmar = document.getElementById("iconoOjitoConfirmar");
+        document.getElementById("btnOjitoConfirmar").addEventListener("click", () => togglePassword(campoConfirmar, iconoConfirmar));
 
-        // ------------------------------------------
+        const formulario = document.getElementById("formulario");
+        const divErrores = document.getElementById("errores");
 
-        let formulario = document.querySelector("form");
-        let divErrores = document.getElementById("errores");
-
+        /**
+         * Procesa el formulario de registro y almacena en sessionStorage si es válido.
+         */
         formulario.addEventListener("submit", (e) => {
           e.preventDefault();
           
-          let valorNombre = document.getElementById("name").value.trim();
-          let valorApellido = document.getElementById("lastName").value.trim();
-          let valorCorreo = document.getElementById("email").value.trim();
-          
-          // Usamos directamente las variables que ya declaramos arriba
-          let valorContrasena = campoContrasenaRegistro.value.trim();
-          let valorConfirmarContrasena = campoConfirmarContrasena.value.trim();
-
+          const valorNombre = document.getElementById("name").value.trim();
+          const valorApellido = document.getElementById("lastName").value.trim();
+          const valorCorreo = document.getElementById("email").value.trim();
+          const valorContrasena = campoContrasena.value.trim();
+          const valorConfirmarContrasena = campoConfirmar.value.trim();
           let errores = [];
 
-          if (!nombreRegex.test(valorNombre)) errores.push("El nombre no es válido");
-          if (!nombreRegex.test(valorApellido)) errores.push("El apellido no es válido");
-          if (!correoRegex.test(valorCorreo)) errores.push("El correo no es válido");
-          if (!passwordRegex.test(valorContrasena)) errores.push("La contraseña no es válida (requiere mayúscula, minúscula, número y símbolo)");
-          if (valorContrasena !== valorConfirmarContrasena || valorConfirmarContrasena === "") errores.push("Las contraseñas no coinciden");
+          if (!nombreRegex.test(valorNombre)) errores.push("El nombre no es válido.");
+          if (!nombreRegex.test(valorApellido)) errores.push("El apellido no es válido.");
+          if (!correoRegex.test(valorCorreo)) errores.push("El correo no es válido.");
+          if (!passwordRegex.test(valorContrasena)) errores.push("La contraseña requiere mayúscula, minúscula, número y símbolo.");
+          if (valorContrasena !== valorConfirmarContrasena || valorConfirmarContrasena === "") errores.push("Las contraseñas no coinciden.");
 
-          let usuariosGuardados = JSON.parse(sessionStorage.getItem("usuarios")) || [];
-          let existeCorreo = usuariosGuardados.some(u => u.correo.toLowerCase() === valorCorreo.toLowerCase());
+          const usuariosGuardados = JSON.parse(sessionStorage.getItem("usuarios")) || [];
+          const existeCorreo = usuariosGuardados.some(u => u.correo.toLowerCase() === valorCorreo.toLowerCase());
 
-          if (existeCorreo) errores.push("Este correo electrónico ya se encuentra registrado");
+          if (existeCorreo) errores.push("Este correo electrónico ya se encuentra registrado.");
 
           divErrores.innerHTML = "";
-          divErrores.className = ""; 
+          divErrores.className = "mt-2"; 
 
           if (errores.length > 0) {
-            divErrores.classList.add("text-red-600", "font-semibold", "mt-2");
+            divErrores.classList.add("text-red-600", "font-semibold", "text-sm", "bg-red-50", "p-3", "rounded-lg", "border", "border-red-200");
             errores.forEach((error) => {
-              divErrores.innerHTML += `<p>• ${error}</p>`;
+              divErrores.innerHTML += `<p class="flex items-center gap-2"><i class="fa-solid fa-circle-xmark"></i> ${error}</p>`;
             });
           } else {
-            let nuevoUsuario = {
+            const nuevoUsuario = {
               nombre: valorNombre,
               apellido: valorApellido,
               correo: valorCorreo.toLowerCase(),
@@ -138,10 +141,7 @@
             usuariosGuardados.push(nuevoUsuario);
             sessionStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
 
-            let parrafo = document.createElement("p");
-            parrafo.innerHTML = "✅ Registro exitoso. Redirigiendo al inicio de sesión...";
-            parrafo.classList.add("bg-green-100", "text-green-700", "p-3", "rounded-lg", "text-center", "font-bold", "mt-2");
-            divErrores.appendChild(parrafo);
+            divErrores.innerHTML = `<p class="bg-green-100 text-green-700 p-3 rounded-lg text-center font-bold border border-green-300 flex items-center justify-center gap-2"><i class="fa-solid fa-circle-check"></i> Registro exitoso. Redirigiendo...</p>`;
             
             setTimeout(() => {
               window.location.href = "login.html";
