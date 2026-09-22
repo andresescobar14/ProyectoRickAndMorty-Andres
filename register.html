@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Usuario</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 p-4 flex flex-col items-center justify-center min-h-screen">
+    <form class="max-w-xl w-full mx-auto bg-white p-8 rounded-xl flex flex-col gap-4" id="formulario">
+      <h2 class="text-2xl font-bold text-center mb-4">Registro de Usuario</h2>
+      
+      <div class="flex flex-col">
+        <label for="name" class="font-semibold mb-1">Nombre</label>
+        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="text" id="name" name="nombre" placeholder="Ej. Juan" />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="lastName" class="font-semibold mb-1">Apellido</label>
+        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="text" id="lastName" name="apellido" placeholder="Ej. Pérez" />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="email" class="font-semibold mb-1">Correo</label>
+        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="email" id="email" name="correo" placeholder="correo@ejemplo.com" />
+      </div>
+      
+      <!-- Contraseña -->
+      <div class="flex flex-col">
+        <label for="password" class="font-semibold mb-1">Contraseña</label>
+        <div class="relative">
+          <input class="border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-full focus:outline-none focus:border-blue-500" type="password" id="password" name="contraseña" placeholder="Contraseña segura" />
+          <span id="btnOjitoRegistro" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500">👁️</span>
+        </div>
+      </div>
+      
+      <!-- Confirmar Contraseña -->
+      <div class="flex flex-col">
+        <label for="confirmPassword" class="font-semibold mb-1">Confirmar Contraseña</label>
+        <div class="relative">
+          <input class="border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-full focus:outline-none focus:border-blue-500" type="password" id="confirmPassword" name="confirmar_contraseña" placeholder="Repite tu contraseña" />
+          <span id="btnOjitoConfirmar" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500">👁️</span>
+        </div>
+      </div>
+      
+      <input type="submit" value="Registrarse" class="mt-4 p-3 bg-blue-600 hover:bg-blue-700 transition duration-300 font-bold rounded-lg text-white cursor-pointer"/>
+      
+      <p class="text-center text-sm text-gray-600 mt-2">¿Ya tienes cuenta? <a href="login.html" class="text-blue-600 font-bold hover:underline">Inicia sesión</a></p>
+
+      <div id="errores"></div>
+    </form>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Validación de ruta: Si ya hay sesión activa, expulsar de registro
+        if (sessionStorage.getItem("estadoSesionActiva")) {
+          window.location.href = "main.html";
+          return;
+        }
+
+        let nombreRegex = /^[a-zA-ZñÑáÁéÉíÍóÓúÚ\s']+$/i; 
+        let correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        let passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&\.])[A-Za-z\d@$!\%*#?&\.]{8,50}$/;
+
+        // --- LÓGICA DE VISIBILIDAD DE CONTRASEÑA ---
+        
+        let btnOjitoRegistro = document.getElementById("btnOjitoRegistro");
+        let campoContrasenaRegistro = document.getElementById("password");
+
+        btnOjitoRegistro.addEventListener("click", () => {
+          if (campoContrasenaRegistro.type === "password") {
+            campoContrasenaRegistro.type = "text";
+            btnOjitoRegistro.textContent = "🙈";
+          } else {
+            campoContrasenaRegistro.type = "password";
+            btnOjitoRegistro.textContent = "👁️";
+          }
+        });
+
+        let btnOjitoConfirmar = document.getElementById("btnOjitoConfirmar");
+        let campoConfirmarContrasena = document.getElementById("confirmPassword");
+
+        btnOjitoConfirmar.addEventListener("click", () => {
+          if (campoConfirmarContrasena.type === "password") {
+            campoConfirmarContrasena.type = "text";
+            btnOjitoConfirmar.textContent = "🙈";
+          } else {
+            campoConfirmarContrasena.type = "password";
+            btnOjitoConfirmar.textContent = "👁️";
+          }
+        });
+
+        // ------------------------------------------
+
+        let formulario = document.querySelector("form");
+        let divErrores = document.getElementById("errores");
+
+        formulario.addEventListener("submit", (e) => {
+          e.preventDefault();
+          
+          let valorNombre = document.getElementById("name").value.trim();
+          let valorApellido = document.getElementById("lastName").value.trim();
+          let valorCorreo = document.getElementById("email").value.trim();
+          
+          // Usamos directamente las variables que ya declaramos arriba
+          let valorContrasena = campoContrasenaRegistro.value.trim();
+          let valorConfirmarContrasena = campoConfirmarContrasena.value.trim();
+
+          let errores = [];
+
+          if (!nombreRegex.test(valorNombre)) errores.push("El nombre no es válido");
+          if (!nombreRegex.test(valorApellido)) errores.push("El apellido no es válido");
+          if (!correoRegex.test(valorCorreo)) errores.push("El correo no es válido");
+          if (!passwordRegex.test(valorContrasena)) errores.push("La contraseña no es válida (requiere mayúscula, minúscula, número y símbolo)");
+          if (valorContrasena !== valorConfirmarContrasena || valorConfirmarContrasena === "") errores.push("Las contraseñas no coinciden");
+
+          let usuariosGuardados = JSON.parse(sessionStorage.getItem("usuarios")) || [];
+          let existeCorreo = usuariosGuardados.some(u => u.correo.toLowerCase() === valorCorreo.toLowerCase());
+
+          if (existeCorreo) errores.push("Este correo electrónico ya se encuentra registrado");
+
+          divErrores.innerHTML = "";
+          divErrores.className = ""; 
+
+          if (errores.length > 0) {
+            divErrores.classList.add("text-red-600", "font-semibold", "mt-2");
+            errores.forEach((error) => {
+              divErrores.innerHTML += `<p>• ${error}</p>`;
+            });
+          } else {
+            let nuevoUsuario = {
+              nombre: valorNombre,
+              apellido: valorApellido,
+              correo: valorCorreo.toLowerCase(),
+              password: valorContrasena
+            };
+
+            usuariosGuardados.push(nuevoUsuario);
+            sessionStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
+
+            let parrafo = document.createElement("p");
+            parrafo.innerHTML = "✅ Registro exitoso. Redirigiendo al inicio de sesión...";
+            parrafo.classList.add("bg-green-100", "text-green-700", "p-3", "rounded-lg", "text-center", "font-bold", "mt-2");
+            divErrores.appendChild(parrafo);
+            
+            setTimeout(() => {
+              window.location.href = "login.html";
+            }, 1500);
+          }
+        });
+      });
+    </script>
+</body>
+</html>

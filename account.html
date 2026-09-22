@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Cuenta</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans">
+  
+  <header class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-md">
+    <h1 class="text-xl font-bold">Mi Perfil</h1>
+    <a href="main.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition duration-300">
+      <i class="fa-solid fa-arrow-left mr-1"></i> Volver
+    </a>
+  </header>
+
+  <main class="flex-grow flex items-center justify-center p-4">
+    <form class="max-w-xl w-full mx-auto bg-white p-8 rounded-xl flex flex-col gap-4 shadow-lg" id="formActualizar">
+      <h2 class="text-2xl font-bold text-center mb-2">Configuración de Cuenta</h2>
+      <p class="text-center text-sm text-gray-500 mb-4">Modifica tus datos y guarda los cambios.</p>
+      
+      <div class="flex flex-col">
+        <label for="name" class="font-semibold mb-1">Nombre</label>
+        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="text" id="name" name="nombre" />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="lastName" class="font-semibold mb-1">Apellido</label>
+        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="text" id="lastName" name="apellido" />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="email" class="font-semibold mb-1">Correo</label>
+        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="email" id="email" name="correo" />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="password" class="font-semibold mb-1">Contraseña Nueva o Actual</label>
+        <div class="relative">
+          <input class="border border-gray-300 rounded-lg py-2 pl-4 pr-10 w-full focus:outline-none focus:border-blue-500" type="password" id="password" name="contraseña" />
+          <span id="btnOjitoCuenta" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500">👁️</span>
+        </div>
+      </div>
+      
+      <input type="submit" value="Guardar Cambios" class="mt-4 p-3 bg-green-600 hover:bg-green-700 transition duration-300 font-bold rounded-lg text-white cursor-pointer shadow-md"/>
+      
+      <div id="errores"></div>
+    </form>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Validar que el usuario esté logueado
+      if (!sessionStorage.getItem("estadoSesionActiva")) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Referencias Regex
+      let nombreRegex = /^[a-zA-ZñÑáÁéÉíÍóÓúÚ\s']+$/i; 
+      let correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      let passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&\.])[A-Za-z\d@$!\%*#?&\.]{8,50}$/;
+
+      // Toggle para ver contraseña
+      let btnOjitoCuenta = document.getElementById("btnOjitoCuenta");
+      let campoClave = document.getElementById("password");
+      
+      btnOjitoCuenta.addEventListener("click", () => {
+        if (campoClave.type === "password") {
+          campoClave.type = "text";
+          btnOjitoCuenta.textContent = "🙈";
+        } else {
+          campoClave.type = "password";
+          btnOjitoCuenta.textContent = "👁️";
+        }
+      });
+
+      // Obtener la base de datos de usuarios y el usuario actual
+      let usuariosGuardados = JSON.parse(sessionStorage.getItem("usuarios")) || [];
+      let correoActualSession = sessionStorage.getItem("usuarioLogueado");
+      
+      // Encontrar los datos del usuario actual en el array
+      let indexUsuarioActual = usuariosGuardados.findIndex(u => u.correo === correoActualSession);
+      let datosUsuario = usuariosGuardados[indexUsuarioActual];
+
+      // Rellenar los inputs con la información existente
+      document.getElementById("name").value = datosUsuario.nombre;
+      document.getElementById("lastName").value = datosUsuario.apellido;
+      document.getElementById("email").value = datosUsuario.correo;
+      document.getElementById("password").value = datosUsuario.password;
+
+      // Lógica al guardar
+      let formulario = document.getElementById("formActualizar");
+      let divErrores = document.getElementById("errores");
+
+      formulario.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        let valorNombre = document.getElementById("name").value.trim();
+        let valorApellido = document.getElementById("lastName").value.trim();
+        let valorCorreo = document.getElementById("email").value.trim().toLowerCase();
+        let valorContrasena = document.getElementById("password").value.trim();
+
+        let errores = [];
+
+        // Validaciones
+        if (!nombreRegex.test(valorNombre)) errores.push("El nombre no es válido");
+        if (!nombreRegex.test(valorApellido)) errores.push("El apellido no es válido");
+        if (!correoRegex.test(valorCorreo)) errores.push("El correo no es válido");
+        if (!passwordRegex.test(valorContrasena)) errores.push("La contraseña no es válida (requiere mayúscula, minúscula, número y símbolo)");
+
+        // Verificar si el correo que intenta poner YA existe (que no sea el suyo mismo)
+        if (valorCorreo !== datosUsuario.correo) {
+          let existeCorreo = usuariosGuardados.some(u => u.correo === valorCorreo);
+          if (existeCorreo) errores.push("Este correo electrónico ya se encuentra registrado por otro usuario.");
+        }
+
+        divErrores.innerHTML = "";
+        divErrores.className = "";
+
+        if (errores.length > 0) {
+          divErrores.classList.add("text-red-600", "font-semibold", "mt-2");
+          errores.forEach((error) => {
+            divErrores.innerHTML += `<p>• ${error}</p>`;
+          });
+        } else {
+          // 1. Si cambió su correo, migrar sus favoritos antiguos a la nueva clave
+          if (valorCorreo !== datosUsuario.correo) {
+            let favoritosAntiguos = localStorage.getItem(`favoritos_${datosUsuario.correo}`);
+            if (favoritosAntiguos) {
+              localStorage.setItem(`favoritos_${valorCorreo}`, favoritosAntiguos);
+              localStorage.removeItem(`favoritos_${datosUsuario.correo}`); // Borrar el viejo
+            }
+          }
+
+          // 2. Actualizamos el objeto en el Array general
+          usuariosGuardados[indexUsuarioActual] = {
+            nombre: valorNombre,
+            apellido: valorApellido,
+            correo: valorCorreo,
+            password: valorContrasena
+          };
+          sessionStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
+
+          // 3. Actualizar la sesión actual inmediatamente
+          sessionStorage.setItem("usuarioLogueado", valorCorreo);
+          sessionStorage.setItem("nombreUsuario", valorNombre);
+
+          // 4. Mensaje de éxito
+          let parrafo = document.createElement("p");
+          parrafo.innerHTML = "✅ Cambios guardados correctamente.";
+          parrafo.classList.add("bg-green-100", "text-green-700", "p-3", "rounded-lg", "text-center", "font-bold", "mt-2");
+          divErrores.appendChild(parrafo);
+
+          // Como las variables de session se actualizan, la proxima vez que abra "main" verá su nuevo nombre
+        }
+      });
+    });
+  </script>
+</body>
+</html>

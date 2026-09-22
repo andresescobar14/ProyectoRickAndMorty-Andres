@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 p-4 flex flex-col items-center justify-center min-h-screen">
+    <form class="max-w-xl w-full mx-auto bg-white p-8 rounded-xl flex flex-col gap-4" id="formulario">
+      <h2 class="text-2xl font-bold text-center mb-4">Iniciar Sesión</h2>
+      
+      <div class="flex flex-col">
+        <label for="name" class="font-semibold mb-1">Nombre o correo electrónico</label>
+        <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="text" id="name" name="nombre" placeholder="Ej. Juan, juan@gmail.com" />
+      </div>
+      
+      <div class="flex flex-col">
+        <label for="password" class="font-semibold mb-1">Contraseña</label>
+        <div class="relative">
+          <input class="border border-gray-300 rounded-lg py-2 px-4 w-full focus:outline-none focus:border-blue-500" type="password" id="password" name="contraseña" placeholder="Contraseña segura" />
+          <!-- Aquí cambiamos el id del ojito -->
+          <span id="btnOjito" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500">👁️</span>
+        </div>
+      </div>
+
+      <input type="submit" value="Iniciar Sesión" class="mt-4 p-3 bg-blue-600 hover:bg-blue-700 transition duration-300 font-bold rounded-lg text-white cursor-pointer"/>
+
+      <p class="text-center text-sm text-gray-600 mt-2">¿No tienes cuenta? <a href="register.html" class="text-blue-600 font-bold hover:underline">Regístrate</a></p>
+
+      <div id="errores"></div>
+    </form>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Validación de ruta: Si ya hay sesión activa, expulsar al main
+        if (sessionStorage.getItem("estadoSesionActiva")) {
+          window.location.href = "main.html";
+          return;
+        }
+
+        let nombreRegex = /^[a-zA-ZñÑáÁéÉíÍóÓúÚ\s']+$/i; 
+        let correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        let passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&\.])[A-Za-z\d@$!\%*#?&\.]{8,50}$/;
+
+        let formulario = document.querySelector("form");
+        
+        // Cambiamos los nombres genéricos
+        let btnOjito = document.getElementById("btnOjito");
+        let campoContrasena = document.getElementById("password");
+        
+        btnOjito.addEventListener("click", () => {
+          if (campoContrasena.type === "password") {
+            campoContrasena.type = "text";
+            btnOjito.textContent = "🙈";
+          } else {
+            campoContrasena.type = "password";
+            btnOjito.textContent = "👁️";
+          }
+        });
+
+        let divErrores = document.getElementById("errores");
+
+        formulario.addEventListener("submit", (e) => {
+          e.preventDefault();
+          
+          let valorNombre = document.getElementById("name").value.trim();
+          let valorContrasenaFinal = campoContrasena.value.trim();
+
+          let errores = [];
+
+          if (valorNombre === "") {
+            errores.push("El campo de nombre/correo está vacío");
+          } else if (valorNombre.includes('@')) {
+            if (!correoRegex.test(valorNombre)) errores.push("El formato del correo electrónico no es válido");
+          } else {
+            if (!nombreRegex.test(valorNombre)) errores.push("El nombre contiene caracteres no válidos");
+          } 
+
+          if (!passwordRegex.test(valorContrasenaFinal)) {
+              errores.push("La contraseña no cumple el formato requerido");
+          }
+
+          let usuarioValido = null;
+          
+          if (errores.length === 0) {
+            let usuariosGuardados = JSON.parse(sessionStorage.getItem("usuarios")) || [];
+
+            usuarioValido = usuariosGuardados.find(u => 
+              (u.correo.toLowerCase() === valorNombre.toLowerCase() || u.nombre.toLowerCase() === valorNombre.toLowerCase()) &&
+              u.password === valorContrasenaFinal
+            );
+
+            if (!usuarioValido) {
+              errores.push("Las credenciales ingresadas son incorrectas o el usuario no existe");
+            }
+          }
+          
+          divErrores.innerHTML = "";
+          divErrores.className = "";
+
+          if (errores.length > 0) {
+            divErrores.classList.add("text-red-600", "font-semibold", "mt-2");
+            errores.forEach((error) => {
+              divErrores.innerHTML += `<p>• ${error}</p>`;
+            });
+          } else {
+            // Guardamos con la nueva variable no genérica: estadoSesionActiva
+            sessionStorage.setItem("usuarioLogueado", usuarioValido.correo);
+            sessionStorage.setItem("nombreUsuario", usuarioValido.nombre);
+            sessionStorage.setItem("estadoSesionActiva", "true");
+
+            let parrafo = document.createElement("p");
+            parrafo.innerHTML = "✅ ¡Inicio de sesión exitoso! Redirigiendo...";
+            parrafo.classList.add("bg-green-100", "text-green-700", "p-3", "rounded-lg", "text-center", "font-bold", "mt-2");
+            divErrores.appendChild(parrafo);
+
+            setTimeout(() => {
+              window.location.href = "main.html";
+            }, 1500);
+          }
+        });
+      });
+    </script>
+</body>
+</html>
