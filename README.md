@@ -1,6 +1,6 @@
 # 🌌 Rick and Morty API - Catálogo Interactivo
 
-🚀 **Live Demo:** [https://andresescobar14.github.io/ProyectoRickAndMorty-Andres/](https://andresescobar14.github.io/ProyectoRickAndMorty-Andres/register.html)
+🚀 **Live Demo:** [https://andresescobar14.github.io/ProyectoRickAndMorty-Andres/](https://andresescobar14.github.io/ProyectoRickAndMorty-Andres/index.html)
 
 Una aplicación web frontend 100% responsiva que consume la API REST oficial de Rick and Morty. Permite a los usuarios registrarse, iniciar sesión, explorar el catálogo completo de personajes y gestionar una lista de favoritos personalizada.
 
@@ -29,7 +29,7 @@ Este proyecto pone en práctica fundamentos de desarrollo web y lógica de progr
 \`\`\`text
 📦 rick-and-morty-app
  ┣ 📜 login.html       # Interfaz principal de inicio de sesión
- ┣ 📜 register.html    # Formulario de alta de nuevos usuarios
+ ┣ 📜 index.html    # Formulario de alta de nuevos usuarios
  ┣ 📜 main.html        # Catálogo general de personajes (Protegida)
  ┣ 📜 character.html   # Vista de detalles y estadísticas de un personaje (Protegida)
  ┣ 📜 account.html     # Gestión de perfil y actualización de datos (Protegida)
