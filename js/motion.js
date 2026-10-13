@@ -1,39 +1,88 @@
-/* GSAP entrances + a bounded canvas effect. No animation is required to see content. */
+/* GSAP interactions, AOS section entrances and a bounded canvas effect. */
 (function () {
   'use strict';
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
-  const pending = new Set(), tweens = new Set();
-  let observer;
-  const animate = (elements) => {
+  const desktop = matchMedia('(min-width: 881px)');
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+  const pending = new Set(), revealTweens = new Set(), introTweens = new Set(), interactionTweens = new Set();
+  let observer, aosInitialized = false;
+  function animate(elements, scope = revealTweens) {
     if (preference.matches || !window.gsap || !elements.length) return;
-    const tween = gsap.fromTo(elements, { y: 22, opacity: 0 }, {
-      y: 0, opacity: 1, duration: .56, stagger: { amount: Math.min(.24, elements.length * .035) },
-      ease: 'power2.out', clearProps: 'transform,opacity', onComplete: () => tweens.delete(tween)
+    const tween = gsap.fromTo(elements, { y: desktop.matches ? 30 : 18, opacity: 0 }, {
+      y: 0, opacity: 1, duration: desktop.matches ? .68 : .48,
+      stagger: { amount: Math.min(.3, elements.length * .05) }, ease: 'power2.out',
+      clearProps: 'transform,opacity', onComplete: () => scope.delete(tween)
     });
-    tweens.add(tween);
-  };
+    scope.add(tween);
+  }
+  function initAOS() {
+    document.querySelectorAll('.section-heading, .filters, .episodes-panel, .site-footer').forEach(element => {
+      if (!element.hasAttribute('data-enter') && !element.hasAttribute('data-reveal')) element.dataset.aos = 'fade-up';
+    });
+    if (preference.matches || !window.AOS) { document.documentElement.classList.remove('aos-ready'); return; }
+    try {
+      document.documentElement.classList.add('aos-ready');
+      if (!aosInitialized) {
+        AOS.init({ duration: 460, offset: 32, once: true, mirror: false,
+          throttleDelay: 120, debounceDelay: 100, disableMutationObserver: true });
+        aosInitialized = true;
+      } else AOS.refreshHard();
+    } catch { document.documentElement.classList.remove('aos-ready'); }
+  }
   if ('IntersectionObserver' in window) {
     observer = new IntersectionObserver(entries => {
       const visible = entries.filter(entry => entry.isIntersecting).map(entry => entry.target);
       visible.forEach(element => { observer.unobserve(element); pending.delete(element); });
       animate(visible);
-    }, { threshold: .12 });
+    }, { threshold: .08 });
   }
   function reveal(container = document) {
     container.querySelectorAll('[data-reveal]').forEach(element => {
       if (preference.matches || !observer || !window.gsap) return;
       pending.add(element); observer.observe(element);
     });
+    initAOS();
   }
-  function reset() {
-    observer?.disconnect(); pending.clear();
-    tweens.forEach(tween => tween.progress(1).kill()); tweens.clear();
+  function finish(scope) {
+    [...scope].forEach(tween => { tween.progress(1).kill(); }); scope.clear();
   }
+  // Catalog reloads must not cancel header or form entrances.
+  function reset() { observer?.disconnect(); pending.clear(); finish(revealTweens); }
+  function resetAll() { reset(); finish(introTweens); finish(interactionTweens); }
   function feedback(element) {
     if (!preference.matches && window.gsap) {
-      gsap.fromTo(element, { x: -4 }, { x: 0, duration: .3, ease: 'elastic.out(1,.4)', clearProps: 'transform' });
+      const tween = gsap.fromTo(element, { x: -4 }, { x: 0, duration: .3,
+        ease: 'elastic.out(1,.4)', clearProps: 'transform', onComplete: () => interactionTweens.delete(tween) });
+      interactionTweens.add(tween);
     }
   }
+  // Desktop interactions run on pointer entry/exit only; no pointermove loop or tilt calculation.
+  function hoverCard(event, entered) {
+    if (preference.matches || !desktop.matches || !finePointer.matches || !window.gsap) return;
+    const card = event.target.closest?.('.character-card');
+    if (!card || card.contains(event.relatedTarget)) return;
+    const image = card.querySelector('.character-image img'), arrow = card.querySelector('.card-arrow');
+    const targets = [image, arrow].filter(Boolean);
+    gsap.killTweensOf(targets);
+    interactionTweens.forEach(tween => { if (tween.targets().some(target => targets.includes(target))) interactionTweens.delete(tween); });
+    for (const [target, props] of [[image, { scale: entered ? 1.055 : 1, y: entered ? -3 : 0 }], [arrow, { x: entered ? 3 : 0, y: entered ? -3 : 0 }]]) {
+      if (!target) continue;
+      const tween = gsap.to(target, { ...props, duration: entered ? .28 : .22, ease: 'power2.out',
+        overwrite: 'auto', ...(entered ? {} : { clearProps: 'transform' }), onComplete: () => interactionTweens.delete(tween) });
+      interactionTweens.add(tween);
+    }
+  }
+  document.addEventListener('pointerover', event => hoverCard(event, true));
+  document.addEventListener('pointerout', event => hoverCard(event, false));
+  function syncDesktopClass() {
+    const enabled = desktop.matches && finePointer.matches && !preference.matches && !!window.gsap;
+    document.documentElement.classList.toggle('gsap-desktop-motion', enabled);
+    if (!enabled && window.gsap) {
+      const targets = document.querySelectorAll('.character-image img, .card-arrow');
+      finish(interactionTweens); gsap.killTweensOf(targets); gsap.set(targets, { clearProps: 'transform' });
+    }
+  }
+  desktop.addEventListener('change', syncDesktopClass); finePointer.addEventListener('change', syncDesktopClass);
   // One canvas, at most 26 particles, capped resolution and a 30 fps draw budget.
   const canvas = document.getElementById('portal-canvas');
   let particleColor = 'rgba(120,200,255,.48)', particleAccent = '#78c8ff';
@@ -87,12 +136,17 @@
   }
   document.addEventListener('visibilitychange', () => {
     document.documentElement.classList.toggle('page-hidden', document.hidden);
-    tweens.forEach(tween => document.hidden ? tween.pause() : tween.resume()); sync();
+    [revealTweens, introTweens, interactionTweens].forEach(scope => scope.forEach(tween => document.hidden ? tween.pause() : tween.resume())); sync();
   });
-  preference.addEventListener('change', () => { reset(); sync(); });
-  window.addEventListener('pagehide', () => { reset(); stop(); });
-  window.addEventListener('pageshow', sync);
+  preference.addEventListener('change', () => { resetAll(); syncDesktopClass(); initAOS(); sync(); });
+  window.addEventListener('pagehide', () => { resetAll(); stop(); });
+  window.addEventListener('pageshow', () => { sync(); initAOS(); });
   window.PortalMotion = { reveal, reset, feedback, canvasRunning: () => active };
-  animate([...document.querySelectorAll('[data-enter]')]);
+  syncDesktopClass();
+  const isAuth = document.body.dataset.page === 'login' || document.body.dataset.page === 'register';
+  const intro = isAuth
+    ? document.querySelectorAll('.auth-copy > *, .canvas-wrap, .form-heading > *, #auth-form > *, .auth-switch, .auth-note')
+    : document.querySelectorAll('[data-enter]');
+  animate([...intro], introTweens);
   reveal();
 })();

@@ -6,7 +6,7 @@
 
 [Live Demo ↗](https://rckmtyaeea.xyz) · [Repositorio](https://github.com/andresescobar14/ProyectoRickAndMorty-Andres) · [API oficial](https://rickandmortyapi.com/documentation)
 
-HTML · CSS · JavaScript · GSAP 3.15 · Canvas 2D
+HTML · CSS · JavaScript · GSAP 3.15 · AOS 2.3.4 · Canvas 2D
 
 Proyecto educativo de **Andrés Escobar**. Sin frameworks de interfaz ni compilación necesaria para ejecutar el sitio.
 
@@ -74,13 +74,15 @@ npm test
 | --- | --- |
 | `npm run check` | Comprueba la sintaxis de los cuatro módulos de JavaScript. |
 | `npm test` | Ejecuta pruebas de cuentas, favoritos, migración y consumo de API. |
-| `npm run vendor` | Actualiza la copia local de GSAP desde la versión fijada en `package.json`. |
+| `npm run vendor` | Actualiza las copias locales de GSAP y AOS desde sus versiones fijadas. |
 
-Después de actualizar GSAP, ejecuta `npm run vendor` y guarda `assets/vendor/gsap.min.js` junto con el lockfile. No se carga Tailwind ni GSAP desde un CDN en tiempo de ejecución.
+Después de actualizar GSAP o AOS, ejecuta `npm run vendor` y guarda `assets/vendor/` junto con el lockfile. Las dos librerías se sirven localmente, sin CDN en tiempo de ejecución.
 
 ## Animaciones y rendimiento
 
-- **GSAP:** entradas breves que animan únicamente posición y opacidad. Un `IntersectionObserver` inicia las tarjetas visibles y deja de observarlas después.
+- **GSAP en PC y móvil:** entradas escalonadas en tarjetas, cabeceras, login y registro. Las recargas del catálogo cancelan solo las animaciones de las tarjetas; la cabecera termina su propia entrada. Un `IntersectionObserver` inicia las tarjetas visibles una vez.
+- **Interacción en PC:** en pantallas desde 881 px con ratón, imagen y flecha reaccionan al entrar/salir de una tarjeta. No se escucha `pointermove` ni se ejecutan cálculos de inclinación continuos.
+- **AOS:** entrada de filtros, encabezados de sección, episodios y pie de página al desplazarse. Se ejecuta una vez, con observación automática de mutaciones desactivada y eventos de scroll limitados a intervalos de 120 ms. No anima los mismos elementos que GSAP.
 - **Canvas:** solo aparece en login y registro en escritorio. Máximo de 26 partículas, resolución limitada a 1.5 veces el tamaño CSS y dibujo limitado a 30 FPS.
 - El canvas se detiene al quedar fuera de la pantalla, cuando la pestaña está oculta o al activar `prefers-reduced-motion`. En móvil, el panel decorativo se oculta.
 - Las animaciones respetan la preferencia de movimiento reducido. Si GSAP o las APIs de observación no están disponibles, el contenido sigue siendo visible.
@@ -116,9 +118,9 @@ Para una aplicación con usuarios reales, sustituye este módulo por autenticaci
 | `styles.css` | Diseño, componentes, responsive y movimiento reducido. |
 | `js/core.js` | Cuentas locales, validación, almacenamiento y favoritos. |
 | `js/api.js` | Peticiones, errores, caché, cancelación y timeout. |
-| `js/motion.js` | Entradas GSAP y ciclo de vida del canvas. |
+| `js/motion.js` | GSAP, AOS, hover en PC y ciclo de vida del canvas. |
 | `js/app.js` | Controladores de páginas y eventos delegados. |
-| `assets/` | GSAP, portal SVG e imágenes decorativas locales. |
+| `assets/` | GSAP, AOS, portal SVG e imágenes decorativas locales. |
 | `tests/` | Pruebas automatizadas de lógica. |
 | `docs/screenshots/` | Capturas de la interfaz. |
 | `CNAME` | Dominio personalizado existente: `rckmtyaeea.xyz`. |
@@ -146,7 +148,7 @@ Etiquetas de formulario, indicadores `aria-pressed` en favoritos y pestañas, me
 ## Créditos y alcance
 
 - Datos e imágenes: [The Rick and Morty API](https://rickandmortyapi.com/).
-- Animaciones: [GSAP](https://gsap.com/) · [licencia y condiciones](https://gsap.com/standard-license/).
+- Animaciones: [GSAP](https://gsap.com/) · [licencia y condiciones](https://gsap.com/standard-license/); [AOS](https://github.com/michalsnik/aos) (MIT, licencia incluida en `assets/vendor/aos.LICENSE`).
 - Personajes y marca Rick and Morty: sus respectivos titulares. Proyecto de fans sin afiliación oficial.
 
 La disponibilidad de personajes, imágenes y episodios depende de la API externa. Este repositorio no incluye un backend ni estadísticas de usuarios reales.
