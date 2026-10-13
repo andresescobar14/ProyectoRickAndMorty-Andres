@@ -31,6 +31,8 @@ Puedes utilizar **Explorar sin cuenta** para entrar directamente al catálogo. A
 
 ## Interfaz
 
+Paleta azul moderna: fondos azul noche, superficies navy, acentos azul cielo y portal con partículas celestes. El catálogo, los formularios, los detalles y el perfil comparten la misma identidad visual. Para personalizarla, modifica `--bg`, `--panel`, `--line`, `--accent` y `--accent-hover` en `styles.css`; el canvas toma sus colores de estas variables.
+
 ![Login con portal animado](docs/screenshots/login-desktop.jpg)
 
 <details>

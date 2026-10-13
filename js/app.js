@@ -43,7 +43,7 @@
       const value = event.target.value;
       const score = [value.length >= 8, /[a-z]/.test(value), /[A-Z]/.test(value), /\d/.test(value)].filter(Boolean).length;
       $('#strength-fill').style.width = `${value.length ? score * 25 : 0}%`;
-      $('#strength-fill').style.background = score === 4 ? 'var(--green)' : '#c89977';
+      $('#strength-fill').style.background = score === 4 ? 'var(--accent)' : '#c89977';
     });
     form.addEventListener('submit', async (event) => {
       event.preventDefault(); if (form.getAttribute('aria-busy') === 'true') return;
