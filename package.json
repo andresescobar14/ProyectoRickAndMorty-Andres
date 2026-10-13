@@ -1,0 +1,11 @@
+{
+  "name": "rick-and-morty-portal-andres",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check js/core.js && node --check js/api.js && node --check js/motion.js && node --check js/app.js",
+    "test": "node --test tests/*.test.cjs",
+    "vendor": "node scripts/vendor.cjs"
+  },
+  "devDependencies": { "gsap": "3.15.0" }
+}

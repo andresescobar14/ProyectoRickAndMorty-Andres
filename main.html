@@ -1,136 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catálogo - Rick and Morty</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0d110f"/>
+  <meta name="description" content="Explora el universo de Rick y Morty: personajes, episodios, favoritos y portales. Proyecto de Andrés Escobar."/>
+  <title>Explorar personajes · Rick &amp; Morty Portal</title>
+  <link rel="icon" href="assets/portal.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <script defer src="assets/vendor/gsap.min.js"></script>
+  <script defer src="js/core.js"></script>
+  <script defer src="js/api.js"></script>
+  <script defer src="js/motion.js"></script>
+  <script defer src="js/app.js"></script>
 </head>
-<body class="bg-slate-900 min-h-screen flex flex-col font-sans antialiased text-gray-100">
-  
-  <header class="bg-slate-950 text-white p-4 sm:px-6 md:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xl border-b border-gray-800 sticky top-0 z-50">
-    <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">Rick and Morty</h1>
-    
-    <div class="flex items-center flex-wrap justify-center gap-2 sm:gap-4 w-full sm:w-auto">
-      <span id="displayNombre" class="font-medium text-gray-300 text-sm sm:text-base mr-2"></span>
-      <a href="account.html" class="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white border border-blue-500/50 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all duration-300 text-sm sm:text-base flex items-center">
-        <i class="fa-solid fa-user mr-2"></i> Mi Cuenta
-      </a>
-      <button id="btnCerrarSesion" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/50 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all duration-300 cursor-pointer text-sm sm:text-base flex items-center">
-        <i class="fa-solid fa-power-off mr-2"></i> Salir
-      </button>
-    </div>
-  </header>
-
-  <main class="flex-grow p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
-    <div id="contenedorPersonajes" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      <!-- Tarjetas dinámicas -->
-    </div>
-  </main>
-
-  <script>
-    /**
-     * @fileoverview Módulo principal del catálogo de personajes.
-     * Gestiona la obtención de datos de la API, renderizado de grillas y marcadores de favoritos.
-     */
-    document.addEventListener("DOMContentLoaded", () => {
-      // 1. Validación de sesión
-      const estadoSesionActiva = sessionStorage.getItem("estadoSesionActiva");
-      if (!estadoSesionActiva) {
-        window.location.href = "login.html"; 
-        return;
-      }
-
-      // 2. Información del usuario
-      const nombreUsuario = sessionStorage.getItem("nombreUsuario") || "Usuario";
-      document.getElementById("displayNombre").innerHTML = `Hola, <strong class="text-white">${nombreUsuario}</strong>`;
-
-      // 3. Lógica de cierre de sesión
-      document.getElementById("btnCerrarSesion").addEventListener("click", () => {
-        sessionStorage.removeItem("estadoSesionActiva");
-        sessionStorage.removeItem("usuarioLogueado");
-        sessionStorage.removeItem("nombreUsuario");
-        window.location.href = "login.html";
-      });
-
-      // 4. Lógica de API y favoritos
-      const usuarioLogueado = sessionStorage.getItem("usuarioLogueado");
-      const claveFavoritos = usuarioLogueado ? `favoritos_${usuarioLogueado}` : 'favoritos';
-      const contenedor = document.getElementById("contenedorPersonajes");
-
-      /**
-       * Obtiene y renderiza la lista de personajes de la API oficial.
-       * @async
-       */
-      async function traerPersonajes() {
-        try {
-          const respuesta = await fetch(`https://rickandmortyapi.com/api/character`);
-          const personajes = await respuesta.json();
-          const favoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
-          
-          personajes.results.forEach((personaje) => {
-            const esFavorito = favoritos.some(fav => fav.id === personaje.id);
-            const tarjeta = document.createElement("article");
-            
-            let colorEstado = "bg-gray-500";
-            if(personaje.status === "Alive") colorEstado = "bg-emerald-500";
-            if(personaje.status === "Dead") colorEstado = "bg-rose-500";
-
-            tarjeta.className = "bg-slate-800 text-white rounded-2xl overflow-hidden shadow-lg border border-slate-700 flex flex-col relative transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/20 group";
-            
-            tarjeta.innerHTML = `
-              <a href="./character.html?id=${personaje.id}" class="flex flex-col h-full outline-none focus:ring-2 focus:ring-blue-500 rounded-2xl">
-                <div class="relative overflow-hidden aspect-square sm:aspect-auto sm:h-56">
-                  <img src="${personaje.image}" alt="${personaje.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
-                </div>
-                <div class="p-4 sm:p-5 flex flex-col flex-grow relative z-10 bg-slate-800">
-                  <h2 class="text-lg sm:text-xl font-black leading-tight mb-2 truncate" title="${personaje.name}">${personaje.name}</h2>
-                  <div class="flex items-center justify-between mt-auto">
-                    <div class="flex items-center gap-2 text-slate-300 text-xs sm:text-sm font-medium">
-                      <span class="w-2.5 h-2.5 rounded-full ${colorEstado} shadow-sm"></span>
-                      <span class="truncate max-w-[120px]">${personaje.status} - ${personaje.species}</span>
-                    </div>
-                    <button class="btn-favorito relative z-20 text-xl sm:text-2xl hover:scale-125 active:scale-95 transition-all p-1 cursor-pointer focus:outline-none" aria-label="Añadir a favoritos">
-                      <i class="${esFavorito ? 'fa-solid fa-star text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]' : 'fa-regular fa-star text-slate-400'}" id="icono-${personaje.id}"></i>
-                    </button>
-                  </div>
-                </div>
-              </a>
-            `;
-            
-            contenedor.appendChild(tarjeta);
-
-            // Evento para el botón de favorito de cada tarjeta
-            const btnFavorito = tarjeta.querySelector(".btn-favorito");
-            const icono = tarjeta.querySelector("i");
-
-            btnFavorito.addEventListener("click", (e) => {
-              e.preventDefault(); 
-              e.stopPropagation(); // Evita navegar a character.html al hacer click en la estrella
-              
-              let listaFavoritos = JSON.parse(localStorage.getItem(claveFavoritos)) || [];
-              const yaExiste = listaFavoritos.some(fav => fav.id === personaje.id);
-
-              if (yaExiste) {
-                listaFavoritos = listaFavoritos.filter(fav => fav.id !== personaje.id);
-                icono.className = "fa-regular fa-star text-slate-400";
-              } else {
-                listaFavoritos.push(personaje);
-                icono.className = "fa-solid fa-star text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]";
-              }
-              
-              localStorage.setItem(claveFavoritos, JSON.stringify(listaFavoritos));
-            });
-          });
-        } catch (error) {
-          contenedor.innerHTML = `<div class="col-span-full text-center p-8 bg-red-900/30 border border-red-500 text-red-200 rounded-2xl">Error cargando dimensiones intergalácticas. Intenta más tarde.</div>`;
-        }
-      }
-      
-      traerPersonajes();
-    });
-  </script>
-</body>
-</html>
+<body data-page="catalog">
+  <a class="skip-link" href="#content">Saltar al contenido</a>
+<header class="site-header"><div class="header-inner"><a href="main.html" class="brand" aria-label="Rick y Morty, ir al catálogo"><img src="assets/portal.svg" width="38" height="38" alt=""/><span>RICK <span class="brand-amp">&amp;</span> MORTY<small>INTERDIMENSIONAL ARCHIVE</small></span></a><nav aria-label="Navegación principal"><a href="main.html" class="nav-link" data-nav="catalog">Personajes</a><a href="main.html?view=favorites" class="nav-link" data-nav="favorites">Favoritos <span class="nav-count" data-favorite-count>0</span></a></nav><div class="header-account"><a href="account.html" class="profile-link" aria-label="Mi perfil"><span data-avatar>A</span><span class="profile-name" data-user-name>Explorador</span></a><button class="icon-button" data-logout aria-label="Salir de la sesión" title="Salir">↗</button></div></div></header><main class="page-container" id="content"><section class="catalog-hero"><div data-enter><div class="eyebrow"><span class="tiny-dot"></span> ARCHIVO DEL MULTIVERSO · C-137</div><h1>El multiverso,<br/>a un <em>portal</em><br class="mobile-break"/> de distancia.</h1><p>Un archivo de personajes extraordinariamente extraños.<br class="desktop-break"/> Encuentra tu próxima obsesión interdimensional.</p><div class="hero-bottom"><a href="#catalog" class="button button-primary">Explorar personajes <span aria-hidden="true">↘</span></a><div class="hero-stat"><strong id="universe-count">—</strong><span>personajes por descubrir</span></div></div></div><div class="hero-art" data-enter><div class="portal-art" aria-hidden="true"><div class="portal-halo"></div><img class="portal-ring" src="assets/portal.svg" alt=""/><img class="avatar-rick" src="assets/images/rick.jpg" alt="" width="150" height="150"/><img class="avatar-morty" src="assets/images/morty.jpg" alt="" width="96" height="96"/><span class="coordinate coordinate-one">C-137</span><span class="coordinate coordinate-two">PORTAL ACTIVE</span></div></div></section><section class="catalog-section" id="catalog" aria-labelledby="catalog-title"><div class="section-heading"><div><span class="eyebrow">DIRECTORIO INTERDIMENSIONAL</span><h2 id="catalog-title">Encuentra a tu personaje.</h2></div><div class="view-tabs" role="group" aria-label="Vista del catálogo"><button id="tab-all" aria-pressed="true">Todos</button><button id="tab-favorites" aria-pressed="false">Favoritos <span data-favorite-count>0</span></button></div></div><form class="filters" id="filter-form" role="search"><div class="search-field"><label class="sr-only" for="search">Buscar por nombre</label><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar en cualquier dimensión…" autocomplete="off" maxlength="100"/><kbd aria-hidden="true">/</kbd></div><div class="select-field"><label for="status-filter">Estado</label><select id="status-filter"><option value="">Todos los estados</option><option value="alive">Vivo</option><option value="dead">Muerto</option><option value="unknown">Desconocido</option></select></div><div class="select-field"><label for="species-filter">Especie</label><select id="species-filter"><option value="">Todas las especies</option><option value="Human">Humano</option><option value="Alien">Alien</option><option value="Robot">Robot</option><option value="Humanoid">Humanoide</option><option value="Animal">Animal</option><option value="Mythological Creature">Criatura mitológica</option></select></div><button id="reset-filters" class="icon-button" type="button" aria-label="Limpiar filtros" title="Limpiar filtros">↺</button></form><div class="results-meta"><p id="results-label" role="status" aria-live="polite">Conectando con el multiverso…</p><span class="status"><i></i> API EN VIVO</span></div><div id="character-grid" class="character-grid" aria-busy="true"></div><nav class="pagination" aria-label="Páginas del catálogo"><button id="previous-page" class="button button-secondary" disabled>← Anterior</button><span id="page-label">Página 1</span><button id="next-page" class="button button-secondary" disabled>Siguiente →</button></nav></section></main><footer class="site-footer"><p>WUBBA LUBBA DUB DUB! <span>Un proyecto de <a href="https://github.com/andresescobar14" target="_blank" rel="noopener noreferrer">Andrés Escobar</a></span></p><a href="https://rickandmortyapi.com/" target="_blank" rel="noopener noreferrer">Datos de The Rick and Morty API ↗</a></footer><div id="toast" role="status" aria-live="polite"></div><noscript><p class="noscript">Activa JavaScript para explorar los personajes y gestionar tu perfil.</p></noscript></body></html>
