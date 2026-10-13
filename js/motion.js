@@ -36,6 +36,7 @@
   }
   // One canvas, at most 26 particles, capped resolution and a 30 fps draw budget.
   const canvas = document.getElementById('portal-canvas');
+  let particleColor = 'rgba(120,200,255,.48)', particleAccent = '#78c8ff';
   let frame = 0, active = false, inView = false, last = 0, size = 0, context, particles = [], canvasObserver, resizeObserver;
   const stop = () => { active = false; cancelAnimationFrame(frame); frame = 0; };
   function resize() {
@@ -46,6 +47,9 @@
     canvas.width = Math.round(size * ratio); canvas.height = Math.round(size * ratio);
     context = canvas.getContext('2d'); if (!context) return;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const theme = getComputedStyle(document.documentElement);
+    particleColor = theme.getPropertyValue('--portal-particle').trim() || particleColor;
+    particleAccent = theme.getPropertyValue('--accent').trim() || particleAccent;
     particles = Array.from({ length: innerWidth < 768 ? 16 : 26 }, (_, index) => ({
       angle: index * 2.399, radius: size * (.24 + (index % 7) * .02), speed: .08 + (index % 4) * .03, width: .7 + (index % 3) * .35
     }));
@@ -57,9 +61,9 @@
     const center = size / 2;
     for (const particle of particles) {
       const angle = particle.angle + time * .0001 * particle.speed;
-      context.beginPath(); context.strokeStyle = 'rgba(188,255,104,.42)'; context.lineWidth = particle.width;
+      context.beginPath(); context.strokeStyle = particleColor; context.lineWidth = particle.width;
       context.arc(center, center, particle.radius, angle, angle + .3); context.stroke();
-      context.beginPath(); context.fillStyle = '#c4ff75';
+      context.beginPath(); context.fillStyle = particleAccent;
       context.arc(center + Math.cos(angle) * particle.radius, center + Math.sin(angle) * particle.radius, particle.width + .4, 0, Math.PI * 2); context.fill();
     }
   }
